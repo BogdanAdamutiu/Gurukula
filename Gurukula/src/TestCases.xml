@@ -9,6 +9,10 @@
         <methods>
         <include name="OpenBrowser" />
         <include name="Login" />
+        <include name="NavigateToBranch" />
+        <include name="NavigateToStaff" />
+        <include name="NavigateToAccountInformation" />
+        <include name="NavigateToPasswordChange" />
       </methods>
        </class>
     </classes>
