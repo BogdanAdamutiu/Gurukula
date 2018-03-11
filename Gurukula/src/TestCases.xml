@@ -4,15 +4,15 @@
   	<parameter name="User" value="admin"/> 
 	<parameter name="Password" value="admin"/>
 	<parameter name="RememberMe" value="false"/>
+	<parameter name="Branch" value="Testing" />
+	<parameter name="Code" value="123456" />
     <classes>
        <class name="Testing.Actions">
         <methods>
         <include name="OpenBrowser" />
         <include name="Login" />
         <include name="NavigateToBranch" />
-        <include name="NavigateToStaff" />
-        <include name="NavigateToAccountInformation" />
-        <include name="NavigateToPasswordChange" />
+        <include name="CreateBranch" />
       </methods>
        </class>
     </classes>

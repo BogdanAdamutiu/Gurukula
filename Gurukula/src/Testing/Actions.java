@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -14,13 +15,18 @@ public class Actions {
 
 	private static final Logger log = Logger.getLogger(Loggin.class);	
 	FirefoxDriver Mozila = new FirefoxDriver();
+	String Results = "";
+	String BranchCheck = "";
+	String CodeCheck = "";
+	int NrOfResults = 0;
+	int Error = 0;
 	
 	@Test	
 	public void OpenBrowser() {
 		Mozila.manage().window().maximize();;
 		Mozila.navigate().to("http://192.168.178.227:8080/");
 		Mozila.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-		log.info("Web application lanuched");
+		log.info("Web application launched");
 		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/h1")).isDisplayed()) {
 			Reporter.log("Application lauched successfully");
 		}
@@ -30,7 +36,7 @@ public class Actions {
 	}
 	
 	@Test (dependsOnMethods = {"OpenBrowser"})
-	@Parameters ({ "User", "Password" , "RememberMe"})
+	@Parameters ({"User", "Password" , "RememberMe"})
 	public void Login(String User, String Password, Boolean RememberMe) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[1]/a[2]/span[2]")).click();
 		Thread.sleep(1000);
@@ -130,4 +136,70 @@ public class Actions {
 			Reporter.log("Password page did not open");
 		}
 	}
+
+	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Parameters ({"Branch" , "Code"})
+	public void CreateBranch(String Branch, String Code) throws InterruptedException, IOException {
+		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).isDisplayed()) {
+			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).click();
+			log.info("Click action performed on Cancel button");
+		}
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[1]/button")).click();
+		Thread.sleep(1000);
+		log.info("Click action performed on Create a new Branch button");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/input")).sendKeys(Branch);
+		log.info("Name entered in the Branch Name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/input")).sendKeys(Code);
+		log.info("Code entered in the Branch Code text box");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[1]")).isDisplayed(), "Branch name " + Branch + " can't be set as a branch name because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[2]")).isDisplayed(), "Branch name " + Branch + " can't be set as a branch name because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[3]")).isDisplayed(), "Branch name " + Branch + " can't be set as a branch name because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[4]")).isDisplayed(), "Branch name " + Branch + " can't be set as a branch name because it doesn't respect the format standard");
+		log.info("The format of the branch name was checked and it is according to the standard");
+
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/div/p[1]")).isDisplayed(), "Branch code " + Code + " can't be set as a branch code because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/div/p[2]")).isDisplayed(), "Branch code " + Code + " can't be set as a branch code because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/div/p[3]")).isDisplayed(), "Branch code " + Code + " can't be set as a branch code because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/div/p[4]")).isDisplayed(), "Branch code " + Code + " can't be set as a branch code because it doesn't respect the format standard");
+		log.info("The format of the branch code was checked and it is according to the standard");
+
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[2]")).click();
+		log.info("Click action performed on Save button");
+		Thread.sleep(1000);
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+		log.info("Cleared the search text box");
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(Branch);
+		log.info("Entered the name of the newly created branch in the search text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+		Thread.sleep(1000);
+		log.info("Click action performed on Search a Branch button");
+		
+		//check that there is at least one branch with the given name and code
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertTrue(NrOfResults > 0 , "The branch with the name "+ Branch +" and code "+ Code +" hasn't been created");
+		
+		if (NrOfResults >= 1) {
+			for (int i = 1; i <= NrOfResults; i++) {
+				BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+				CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+				if (BranchCheck.equalsIgnoreCase(Branch) && CodeCheck.equalsIgnoreCase(Code)) {
+					Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" has been created");
+				}
+				else {
+					Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" hasn't been created");
+				}
+			}
+		}
+	}
+
+
+
 }
