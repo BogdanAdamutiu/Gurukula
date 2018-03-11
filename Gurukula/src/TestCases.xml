@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Gurukula" verbose="1" >
+  <test name="Login" >
+  	<parameter name="User" value="admin"/> 
+	<parameter name="Password" value="admin"/>
+	<parameter name="RememberMe" value="false"/>
+    <classes>
+       <class name="Testing.Actions">
+        <methods>
+        <include name="OpenBrowser" />
+        <include name="Login" />
+      </methods>
+       </class>
+    </classes>
+  </test>
+</suite>
