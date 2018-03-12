@@ -4,8 +4,10 @@
   	<parameter name="User" value="admin"/> 
 	<parameter name="Password" value="admin"/>
 	<parameter name="RememberMe" value="false"/>
-	<parameter name="Branch" value="Testing" />
+	<parameter name="Branch" value="Development" />
 	<parameter name="Code" value="123456" />
+	<parameter name="Staff" value="Tester"/>
+	<parameter name="AssigningBranch" value="Development" />
     <classes>
        <class name="Testing.Actions">
         <methods>
@@ -13,6 +15,8 @@
         <include name="Login" />
         <include name="NavigateToBranch" />
         <include name="CreateBranch" />
+        <include name="NavigateToStaff" />
+        <include name="CreateStaff" />
       </methods>
        </class>
     </classes>

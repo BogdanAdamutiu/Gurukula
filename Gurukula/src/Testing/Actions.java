@@ -2,10 +2,10 @@ package Testing;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.annotations.Parameters;
@@ -18,6 +18,7 @@ public class Actions {
 	String Results = "";
 	String BranchCheck = "";
 	String CodeCheck = "";
+	String StaffCheck = "";
 	int NrOfResults = 0;
 	int Error = 0;
 	
@@ -92,7 +93,7 @@ public class Actions {
 		}
 	}
 	
-	@Test (dependsOnMethods = {"Login"})
+	@Test (dependsOnMethods = {"Login" , "CreateBranch"})
 	public void NavigateToStaff() throws InterruptedException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[2]/a/span/span[2]")).click();
 		log.info("Click action performed on Entities drop down menu");
@@ -186,20 +187,67 @@ public class Actions {
 		NrOfResults = Integer.parseInt(Results);
 		Assert.assertTrue(NrOfResults > 0 , "The branch with the name "+ Branch +" and code "+ Code +" hasn't been created");
 		
-		if (NrOfResults >= 1) {
-			for (int i = 1; i <= NrOfResults; i++) {
-				BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
-				CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
-				if (BranchCheck.equalsIgnoreCase(Branch) && CodeCheck.equalsIgnoreCase(Code)) {
-					Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" has been created");
-				}
-				else {
-					Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" hasn't been created");
-				}
+		for (int i = 1; i <= NrOfResults; i++) {
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (BranchCheck.equalsIgnoreCase(Branch) && CodeCheck.equalsIgnoreCase(Code)) {
+				Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" has been created");
+			}
+			else {
+				Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" hasn't been created");
 			}
 		}
 	}
 
+	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Parameters ({"Staff","AssigningBranch"})
+	public void CreateStaff(String Staff, String AssigningBranch) throws InterruptedException, IOException {	
+		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).isDisplayed()) {
+			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).click();
+			log.info("Click action performed on Cancel button");
+		}
 
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[1]/button")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Create a new Staff button");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/input")).sendKeys(Staff);
+		Thread.sleep(500);
+		log.info("Name entered in the Staff Name text box");
+		
+		//check that the name of the staff respects the standard
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[1]")).isDisplayed(), "Staff name "+ Staff +" can't be set as a branch name because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[2]")).isDisplayed(), "Staff name "+ Staff +" can't be set as a branch name because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[3]")).isDisplayed(), "Staff name "+ Staff +" can't be set as a branch name because it doesn't respect the format standard");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/div/p[4]")).isDisplayed(), "Staff name "+ Staff +" can't be set as a branch name because it doesn't respect the format standard");
+		log.info("The format of the staff name was checked and it is according to the standard");
+				
+		//create a select that contains all the available branches
+		Select SelectBranch = new Select(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/select")));		
+
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/select")).click();
+		Thread.sleep(500);	
+		log.info("Branch list has been opened");
+
+		SelectBranch.selectByVisibleText(AssigningBranch);
+		log.info("Desired branch has been selected");
+
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[2]")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Save button");
+		
+		//check that there is at least one staff in the staff list after the save button has been pressed
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertTrue(NrOfResults > 0 , "The Staff with the name "+ Staff +" hasn't been created");
+		
+		for (int i = 1; i <= NrOfResults; i++) {
+			StaffCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (StaffCheck.equalsIgnoreCase(Staff) && BranchCheck.equalsIgnoreCase(AssigningBranch)) {
+				Reporter.log("The staff with the name "+ Staff +" and assigning branch "+ AssigningBranch +" has been created");
+			}
+		}
+	}	
 
 }
