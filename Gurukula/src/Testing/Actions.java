@@ -24,6 +24,7 @@ public class Actions {
 	String ViewedCode = "";
 	int NrOfResults = 0;
 	int Error = 0;
+	int Matched = 0;
 	
 	@Test	
 	public void OpenBrowser() {
@@ -96,7 +97,7 @@ public class Actions {
 		}
 	}
 	
-	@Test (dependsOnMethods = {"Login" , "CreateBranch"})
+	@Test (dependsOnMethods = {"Login"})
 	public void NavigateToStaff() throws InterruptedException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[2]/a/span/span[2]")).click();
 		log.info("Click action performed on Entities drop down menu");
@@ -253,8 +254,8 @@ public class Actions {
 		}
 	}	
 
-	@Test (dependsOnMethods = {"NavigateToBranch" , "CreateBranch"})
-	@Parameters ({"BranchName" , "BranchCode"})
+	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Parameters ({"BranchNameView" , "BranchCodeView"})
 	public void ViewBranch(String BranchName, String BranchCode) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
 		log.info("Cleared the branch search text box");
@@ -269,32 +270,63 @@ public class Actions {
 		//check if a branch with the given name exists
 		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
 		NrOfResults = Integer.parseInt(Results);
-		Assert.assertTrue(NrOfResults > 0 , "You tried to view a non existing branch");
+		Assert.assertFalse(NrOfResults == 0, "You tried to view a non existing branch!");
 
 		for (int i = 1; i <= NrOfResults; i++) {
 			//search for the branch with the desired name and code
 			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
 			CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
 			if (BranchCheck.equalsIgnoreCase(BranchName) && CodeCheck.equalsIgnoreCase(BranchCode)) {
+				Matched ++;
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[4]/button[1]")).click();
+				Thread.sleep(1000);
+				log.info("Click action performed on the View button");
+				
+				Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/h2/span")).getAttribute("innerText");
+				ViewedBranch = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[1]/td[2]/input")).getAttribute("defaultValue");
+				ViewedCode = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[2]/td[2]/input")).getAttribute("defaultValue");
+				Assert.assertFalse(Status.equalsIgnoreCase("Branch"), "You are not on the branch view page");
+				Assert.assertFalse(ViewedBranch.equalsIgnoreCase(BranchName), "The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed!");
+				Assert.assertFalse(ViewedBranch.equalsIgnoreCase(BranchCode), "The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed!");
+
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/button")).click();
+				log.info("Click action performed on the Return button");
+			}
+		}
+		Assert.assertFalse(Matched == 0, "The branch with the name "+ BranchName +" and code "+ BranchCode +" doesn't exist and can't be viewed!");
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Parameters ({"StaffNameView" , "StaffBranchView"})
+	public void ViewStaff(String StaffName, String StaffBranch) throws InterruptedException, IOException {
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertFalse(NrOfResults == 0, "You tried to view a non existing staff");
+
+		for (int i = 1; i <= NrOfResults; i++) {
+			//search for the staff with the desired name and branch
+			StaffCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (StaffCheck.equalsIgnoreCase(StaffName) && BranchCheck.equalsIgnoreCase(StaffBranch)) {
+				Matched ++;
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[4]/button[1]")).click();
 				Thread.sleep(1000);
 				log.info("Click action performed on the View button");
 				
 				//check that the page opened is the view page
+				//also check if the viewed staff is the desired one
 				Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/h2/span")).getAttribute("innerText");
-				ViewedBranch = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[1]/td[2]/input")).getAttribute("defaultValue");
-				ViewedCode = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[2]/td[2]/input")).getAttribute("defaultValue");
-				if (Status.equalsIgnoreCase("Branch") && (ViewedBranch.equalsIgnoreCase(BranchName)) && ViewedCode.equalsIgnoreCase(BranchCode)) {
-					Reporter.log("The branch with the name "+ BranchName +" and code "+ BranchCode +" has been viewed");
-				}
-				else {
-					Reporter.log("The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed");
-				}
+				String StaffView = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[1]/td[2]/input")).getAttribute("defaultValue");
+				String BranchView = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[2]/td[2]/input")).getAttribute("defaultValue");
+				Assert.assertFalse(Status.equalsIgnoreCase("Staff"), "You are not on the staff view page");
+				Assert.assertFalse(StaffView.equalsIgnoreCase(StaffName), "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" hasn't been viewed!");
+				Assert.assertFalse(BranchView.equalsIgnoreCase(StaffBranch), "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" hasn't been viewed!");
+
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/button")).click();
 				log.info("Click action performed on the Return button");
-			}
+			}			
 		}
+		Assert.assertFalse(Matched == 0, "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" doesn't exist and can't be viewed!");
 	}
-	
 }
 
