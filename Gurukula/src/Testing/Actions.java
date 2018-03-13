@@ -30,6 +30,7 @@ public class Actions {
 	int SecondNrOfResults = 0;
 	int Error = 0;
 	int Matched = 0;
+	int Decrement = 0;
 	
 	@Test	
 	public void OpenBrowser() {
@@ -461,6 +462,51 @@ public class Actions {
 		}
 		Assert.assertFalse(Matched == 0, "The staff with the name "+ Name +" and assigned branch "+ Branch +" hasn't been edited!");
 	}
+	
+	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Parameters ({"BranchToDelete" , "CodeToDelete"})
+	public void DeteleBranch(String Name, String Code) throws InterruptedException, IOException {
+		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[3]/div/div/form/div[3]/button[1]")).isDisplayed()) {
+			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[3]/div/div/form/div[3]/button[1]")).click();
+			Thread.sleep(1000);
+			log.info("Click action performed on the Cancel button");
+		}
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+		log.info("Cleared the branch search text box");
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(Name);
+		log.info("Entered the branch name in to the search text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+		Thread.sleep(1000);
+		log.info("Click action performed on the Search button");
+		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Decrement = NrOfResults;
+		Assert.assertFalse(NrOfResults == 0, "You tried to delete a non existing branch!");
+		
+		for (int i = 1; i <= NrOfResults; i++) {				
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ Decrement +"]/td[2]")).getAttribute("innerText");
+			CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ Decrement +"]/td[3]")).getAttribute("innerText");
+			if (BranchCheck.equalsIgnoreCase(Name) && CodeCheck.equalsIgnoreCase(Code)) {
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ Decrement +"]/td[4]/button[3]")).click();
+				Thread.sleep(500);
+				log.info("Click action performed on the Delete button");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[3]/div/div/form/div[3]/button[2]")).click();
+				Thread.sleep(1000);
+				log.info("Click action performed on the Confirmation delete button");
+				
+				Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[3]/div/div/form/div[3]/button[2]")).getAttribute("disabled");
+				Assert.assertTrue(Status == null, "Can't delete branch with staff assigned!");
+				Reporter.log("Succesfully deleted branch "+ Name +" with code "+ Code);
+			}
+			Decrement --;
+		}
+	}	
+	
 	
 	
 	
