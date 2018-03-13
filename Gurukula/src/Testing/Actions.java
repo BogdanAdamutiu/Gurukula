@@ -16,13 +16,18 @@ public class Actions {
 	private static final Logger log = Logger.getLogger(Loggin.class);	
 	FirefoxDriver Mozila = new FirefoxDriver();
 	String Results = "";
+	String SecondResults = "";
 	String Status = "";
 	String BranchCheck = "";
 	String CodeCheck = "";
 	String StaffCheck = "";
 	String ViewedBranch = "";
 	String ViewedCode = "";
+	String BranchSecondCheck = "";
+	String CodeSecondCheck = "";
+	String StaffSecondCheck = "";
 	int NrOfResults = 0;
+	int SecondNrOfResults = 0;
 	int Error = 0;
 	int Matched = 0;
 	
@@ -257,6 +262,8 @@ public class Actions {
 	@Test (dependsOnMethods = {"NavigateToBranch"})
 	@Parameters ({"BranchNameView" , "BranchCodeView"})
 	public void ViewBranch(String BranchName, String BranchCode) throws InterruptedException, IOException {
+		Matched = 0;
+		
 		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
 		log.info("Cleared the branch search text box");
 		
@@ -285,10 +292,11 @@ public class Actions {
 				Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/h2/span")).getAttribute("innerText");
 				ViewedBranch = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[1]/td[2]/input")).getAttribute("defaultValue");
 				ViewedCode = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[2]/td[2]/input")).getAttribute("defaultValue");
-				Assert.assertFalse(Status.equalsIgnoreCase("Branch"), "You are not on the branch view page");
-				Assert.assertFalse(ViewedBranch.equalsIgnoreCase(BranchName), "The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed!");
-				Assert.assertFalse(ViewedBranch.equalsIgnoreCase(BranchCode), "The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed!");
-
+				Assert.assertTrue(Status.equalsIgnoreCase("Branch"), "You are not on the branch view page");
+				Assert.assertTrue(ViewedBranch.equalsIgnoreCase(BranchName), "The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed!");
+				Assert.assertTrue(ViewedCode.equalsIgnoreCase(BranchCode), "The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed!");
+				Reporter.log("Branch "+ BranchName +" with code "+ BranchCode +" has been viewed");
+				
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/button")).click();
 				log.info("Click action performed on the Return button");
 			}
@@ -299,6 +307,8 @@ public class Actions {
 	@Test (dependsOnMethods = {"NavigateToStaff"})
 	@Parameters ({"StaffNameView" , "StaffBranchView"})
 	public void ViewStaff(String StaffName, String StaffBranch) throws InterruptedException, IOException {
+		Matched = 0;
+		
 		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
 		NrOfResults = Integer.parseInt(Results);
 		Assert.assertFalse(NrOfResults == 0, "You tried to view a non existing staff");
@@ -313,20 +323,146 @@ public class Actions {
 				Thread.sleep(1000);
 				log.info("Click action performed on the View button");
 				
-				//check that the page opened is the view page
-				//also check if the viewed staff is the desired one
 				Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/h2/span")).getAttribute("innerText");
 				String StaffView = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[1]/td[2]/input")).getAttribute("defaultValue");
 				String BranchView = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[2]/td[2]/input")).getAttribute("defaultValue");
-				Assert.assertFalse(Status.equalsIgnoreCase("Staff"), "You are not on the staff view page");
-				Assert.assertFalse(StaffView.equalsIgnoreCase(StaffName), "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" hasn't been viewed!");
-				Assert.assertFalse(BranchView.equalsIgnoreCase(StaffBranch), "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" hasn't been viewed!");
-
+				Assert.assertTrue(Status.equalsIgnoreCase("Staff"), "You are not on the staff view page");
+				Assert.assertTrue(StaffView.equalsIgnoreCase(StaffName), "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" hasn't been viewed!");
+				Assert.assertTrue(BranchView.equalsIgnoreCase(StaffBranch), "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" hasn't been viewed!");
+				Reporter.log("Staff "+ StaffName +" with assigned branch "+ StaffBranch +" has been viewed");
+				
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/button")).click();
 				log.info("Click action performed on the Return button");
 			}			
 		}
 		Assert.assertFalse(Matched == 0, "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" doesn't exist and can't be viewed!");
 	}
+	
+	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Parameters ({"BranchToEdit" , "NewBranchName" , "CodeToEdit" , "NewBranchCode"})
+	public void EditBranch(String Name, String NewName, String Code, String NewCode) throws InterruptedException, IOException {				
+		Matched = 0;
+		
+		//search for the branch you want to edit
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+		log.info("Cleared the branch search text box");
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(Name);
+		log.info("Entered the branch name in to the search text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on the Search button");
+		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertFalse(NrOfResults == 0, "You tried to edit a non existing branch!");
+		
+		for (int i = 1; i <= NrOfResults; i++) {
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (BranchCheck.equalsIgnoreCase(Name) && CodeCheck.equalsIgnoreCase(Code)) {
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[4]/button[2]")).click();
+				Thread.sleep(1000);
+				log.info("Click action performed on the Edit button");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/input")).clear();
+				log.info("Cleared the branch name text box");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/input")).clear();
+				log.info("Cleared the branch code text box");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/input")).sendKeys(NewName);
+				log.info("Entered the branch new name in to the name text box");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/input")).sendKeys(NewCode);
+				log.info("Entered the branch new code in to the code text box");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[2]")).click();
+				Thread.sleep(1500);
+				log.info("Click action performed on the Save button");
+				
+				Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+				log.info("Cleared the branch search text box");
+				
+				Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(NewName);
+				log.info("Entered the edited branch name in to the search text box");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+				Thread.sleep(1000);
+				log.info("Click action performed on the Search button");
+					
+				SecondResults = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+				SecondNrOfResults = Integer.parseInt(SecondResults);
+				Assert.assertFalse(SecondNrOfResults == 0, "There is no branch with the edited name! The edit function didn't work!");
+				
+				for (int j = 1; j <= SecondNrOfResults; j++) {
+					BranchSecondCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ j +"]/td[2]")).getAttribute("innerText");
+					CodeSecondCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ j +"]/td[3]")).getAttribute("innerText");
+					Assert.assertTrue(BranchSecondCheck.equalsIgnoreCase(NewName), "The branch with the name "+ Name +" and code "+ Code +" hasn't been edited!");
+					Assert.assertTrue(CodeSecondCheck.equalsIgnoreCase(NewCode), "The branch with the name "+ Name +" and code "+ Code +" hasn't been edited!");
+					Matched ++;
+					Reporter.log("Branch "+ Name +" with code "+ Code +" has been edited to branch with name "+ NewName +" and code "+ NewCode);
+				}
+			}
+		}
+		Assert.assertFalse(Matched == 0, "The branch with the name "+ Name +" and code "+ Code +" hasn't been edited!");
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Parameters ({"StaffToEdit" , "NewStaffName" , "ActualStaffBranch" , "NewStaffBranch"})
+	public void EditStaff(String Name, String NewName, String Branch, String NewBranch) throws InterruptedException, IOException {			
+		Matched = 0;
+		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertFalse(NrOfResults == 0, "You tried to edit a non existing staff!");
+
+		for (int i = 1; i <= NrOfResults; i++) {
+			StaffCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (StaffCheck.equalsIgnoreCase(Name) && BranchCheck.equalsIgnoreCase(Branch)) {
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[4]/button[2]")).click();
+				Thread.sleep(1000);
+				log.info("Click action performed on the Edit button");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/input")).clear();
+				log.info("Cleared the staff name text box");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[2]/input")).sendKeys(NewName);
+				log.info("Entered the staff new name in to the name text box");
+				
+				Select SelectBranch = new Select(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/select")));		
+				//open branch list
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[2]/div[3]/select")).click();
+				Thread.sleep(500);
+				log.info("Opened the branch list");
+				
+				SelectBranch.selectByVisibleText(NewBranch);
+				log.info("Selected the branch new branch");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[2]")).click();
+				Thread.sleep(1500);
+				log.info("Click action performed on the Save button");
+				
+				SecondResults = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+				SecondNrOfResults = Integer.parseInt(Results);
+				Assert.assertFalse(SecondNrOfResults == 0, "There is no staff with the edited name! The edit function didn't work!");
+				
+				for (int j = 1; j <= SecondNrOfResults; j++) {
+					StaffSecondCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ j +"]/td[2]")).getAttribute("innerText");
+					BranchSecondCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ j +"]/td[3]")).getAttribute("innerText");
+					Assert.assertTrue(StaffSecondCheck.equalsIgnoreCase(NewName), "The staff with the name "+ Name +" and assigned branch "+ Branch +" hasn't been edited!");
+					Assert.assertTrue(BranchSecondCheck.equalsIgnoreCase(NewBranch), "The staff with the name "+ Name +" and assigend branch "+ Branch +" hasn't been edited!");
+					Matched ++;
+					Reporter.log("Staff "+ Name +" with assigned branch "+ Branch +" has been edited to staff with name "+ NewName +" and assigned branch "+ NewBranch);
+				}
+			}
+		}
+		Assert.assertFalse(Matched == 0, "The staff with the name "+ Name +" and assigned branch "+ Branch +" hasn't been edited!");
+	}
+	
+	
+	
 }
 
