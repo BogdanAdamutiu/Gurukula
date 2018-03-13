@@ -16,9 +16,12 @@ public class Actions {
 	private static final Logger log = Logger.getLogger(Loggin.class);	
 	FirefoxDriver Mozila = new FirefoxDriver();
 	String Results = "";
+	String Status = "";
 	String BranchCheck = "";
 	String CodeCheck = "";
 	String StaffCheck = "";
+	String ViewedBranch = "";
+	String ViewedCode = "";
 	int NrOfResults = 0;
 	int Error = 0;
 	
@@ -193,7 +196,7 @@ public class Actions {
 			if (BranchCheck.equalsIgnoreCase(Branch) && CodeCheck.equalsIgnoreCase(Code)) {
 				Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" has been created");
 			}
-			else {
+			else if (i == NrOfResults){
 				Reporter.log("The branch with the name "+ Branch +" and code "+ Code +" hasn't been created");
 			}
 		}
@@ -250,4 +253,48 @@ public class Actions {
 		}
 	}	
 
+	@Test (dependsOnMethods = {"NavigateToBranch" , "CreateBranch"})
+	@Parameters ({"BranchName" , "BranchCode"})
+	public void ViewBranch(String BranchName, String BranchCode) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+		log.info("Cleared the branch search text box");
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(BranchName);
+		log.info("Entered the branch name in to the search text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+		Thread.sleep(1000);
+		log.info("Click action performed on the Search button");
+		
+		//check if a branch with the given name exists
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertTrue(NrOfResults > 0 , "You tried to view a non existing branch");
+
+		for (int i = 1; i <= NrOfResults; i++) {
+			//search for the branch with the desired name and code
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (BranchCheck.equalsIgnoreCase(BranchName) && CodeCheck.equalsIgnoreCase(BranchCode)) {
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[4]/button[1]")).click();
+				Thread.sleep(1000);
+				log.info("Click action performed on the View button");
+				
+				//check that the page opened is the view page
+				Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/h2/span")).getAttribute("innerText");
+				ViewedBranch = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[1]/td[2]/input")).getAttribute("defaultValue");
+				ViewedCode = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/table/tbody/tr[2]/td[2]/input")).getAttribute("defaultValue");
+				if (Status.equalsIgnoreCase("Branch") && (ViewedBranch.equalsIgnoreCase(BranchName)) && ViewedCode.equalsIgnoreCase(BranchCode)) {
+					Reporter.log("The branch with the name "+ BranchName +" and code "+ BranchCode +" has been viewed");
+				}
+				else {
+					Reporter.log("The branch with the name "+ BranchName +" and code "+ BranchCode +" hasn't been viewed");
+				}
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/button")).click();
+				log.info("Click action performed on the Return button");
+			}
+		}
+	}
+	
 }
+
