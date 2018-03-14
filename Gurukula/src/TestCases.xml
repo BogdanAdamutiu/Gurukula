@@ -1,13 +1,20 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="Gurukula" verbose="1" >
-  <test name="Login" >
+    <!--
+  <test name="Branch" >  	
   	<parameter name="User" value="admin"/> 
 	<parameter name="Password" value="admin"/>
 	<parameter name="RememberMe" value="false"/>
 	<parameter name="Branch" value="Development" />
-	<parameter name="Code" value="123456" />
-	<parameter name="Staff" value="Tester"/>
-	<parameter name="AssigningBranch" value="Development" />
+	<parameter name="Code" value="123456" />	
+	<parameter name="BranchNameView" value="Development" />
+	<parameter name="BranchCodeView" value="123456" />
+	<parameter name="BranchToEdit" value="Development" />
+	<parameter name="CodeToEdit" value="123456" />
+	<parameter name="NewBranchName" value="QA Team" />
+	<parameter name="NewBranchCode" value="456789" />
+	<parameter name="BranchToDelete" value="Development" />
+	<parameter name="CodeToDelete" value="123456" />	
     <classes>
        <class name="Testing.Actions">
         <methods>
@@ -15,10 +22,37 @@
         <include name="Login" />
         <include name="NavigateToBranch" />
         <include name="CreateBranch" />
-        <include name="NavigateToStaff" />
-        <include name="CreateStaff" />
+        <include name="DeteleBranch" />       
       </methods>
        </class>
     </classes>
   </test>
+  	-->
+  <test name="Staff">
+  	<parameter name="User" value="admin"/> 
+	<parameter name="Password" value="admin"/>
+	<parameter name="RememberMe" value="false"/>
+	<parameter name="Staff" value="Tester"/>
+	<parameter name="AssigningBranch" value="Development" />
+	<parameter name="StaffNameView" value="Tester" />
+	<parameter name="StaffBranchView" value="Development" />
+	<parameter name="StaffToEdit" value="Tester"/>
+	<parameter name="ActualStaffBranch" value="Development" />
+	<parameter name="NewStaffName" value="QA Engineer"/>
+	<parameter name="NewStaffBranch" value="Development" />
+	<parameter name="StaffToDelete" value="Tester"/>
+	<parameter name="StaffBranchToDelete" value="Development" />
+	<classes>
+       <class name="Testing.Actions">
+     	<methods>
+     	 <include name="OpenBrowser" />
+         <include name="Login" />
+         <include name="NavigateToStaff" />
+         <include name="CreateStaff" />
+		 <include name="DeleteStaff" />
+     	</methods>
+       </class>
+    </classes>
+  </test>
+	
 </suite>
