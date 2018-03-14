@@ -20,6 +20,7 @@ public class Actions {
 	String Status = "";
 	String BranchCheck = "";
 	String CodeCheck = "";
+	String IDCheck = "";
 	String StaffCheck = "";
 	String ViewedBranch = "";
 	String ViewedCode = "";
@@ -31,6 +32,7 @@ public class Actions {
 	int Error = 0;
 	int Matched = 0;
 	int Decrement = 0;
+	int DeletedStaffs = 0;
 	
 	@Test	
 	public void OpenBrowser() {
@@ -506,6 +508,121 @@ public class Actions {
 			Decrement --;
 		}
 	}	
+	
+	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Parameters ({"StaffToDelete" , "StaffBranchToDelete"})
+	public void DeleteStaff(String Name, String Branch) throws InterruptedException, IOException {		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Decrement = NrOfResults;
+		Assert.assertFalse(NrOfResults == 0, "There are no staff created, so there is nothing to delete!");
+
+		for (int i = 1; i <= NrOfResults; i++) {
+			StaffCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			if (StaffCheck.equalsIgnoreCase(Name) && BranchCheck.equalsIgnoreCase(Branch)) {
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[4]/button[3]")).click();
+				Thread.sleep(500);
+				log.info("Click action performed on the Delete button");
+				
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[3]/div/div/form/div[3]/button[2]")).click();
+				Thread.sleep(500);
+				log.info("Click action performed on the Confirmation delete button");
+				
+				DeletedStaffs ++;
+				NrOfResults --;
+				i = 1;
+			}
+		}
+		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		if (NrOfResults == 0) {
+			Reporter.log("Deleted a total number of "+ DeletedStaffs +" staffs with the name "+ Name +" and assigned branch "+ Branch);
+		}
+		for (int i = 1; i <= NrOfResults; i++) {
+			StaffCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			Assert.assertTrue(StaffCheck.equalsIgnoreCase(Name) && BranchCheck.equalsIgnoreCase(Branch), "Staff has not been deleted");
+			Assert.assertTrue(DeletedStaffs == 0, "There is no staff to delete with name "+ Name +" and branch "+ Branch);
+			Reporter.log("Staff with name "+ Name +" and assigned branch "+ Branch +" has been successfully deleted!");
+		}
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Parameters ({"BranchSearchCriteria"})
+	public void QueryBranch(String SearchCriteria) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+		log.info("Cleared the branch search text box");
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(SearchCriteria);
+		log.info("Search information entered in the Branch Name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+		Thread.sleep(1000);
+		log.info("Click action performed on the Search button");
+		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertFalse(NrOfResults == 0, "There is no branch that contains in it the search infomation!");
+		
+		for (int i = 1; i <= NrOfResults; i++) {
+			IDCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[1]/a")).getAttribute("innerText");
+			BranchCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[2]")).getAttribute("innerText");
+			CodeCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr["+ i +"]/td[3]")).getAttribute("innerText");
+			Assert.assertTrue(IDCheck.equalsIgnoreCase(SearchCriteria) || BranchCheck.equalsIgnoreCase(SearchCriteria) || CodeCheck.equalsIgnoreCase(SearchCriteria), "There is no branch that contains in it the search infomation!");
+			
+			Reporter.log("Found branch with the folowing information: ID "+ IDCheck +" Name "+ BranchCheck +" Code "+ CodeCheck);								
+		}
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Parameters ({"StaffSearchCriteria"})
+	public void QueryStaff(String SearchCriteria, String Test) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
+		log.info("Cleared the staff search text box");
+		
+		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).sendKeys(SearchCriteria);
+		log.info("Search information entered in the Staff Name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[1]/div/div[2]/form/button")).click();
+		Thread.sleep(1000);
+		log.info("Click action performed on the Search button");
+		
+		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
+		NrOfResults = Integer.parseInt(Results);
+		Assert.assertFalse(NrOfResults == 0, "There is no staff that contains in it the search infomation!");
+
+		for (int i = 1; i <= NrOfResults; i++) {
+			IDCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr[" + i + "]/td[1]/a")).getAttribute("innerText");
+			StaffCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody/tr[" + i + "]/td[2]")).getAttribute("innerText");
+			Assert.assertTrue(IDCheck.equalsIgnoreCase(SearchCriteria) || StaffCheck.equalsIgnoreCase(SearchCriteria), "There is no staff that contains in it the search infomation!");
+			Reporter.log("Found staff with the folowing information: ID "+ IDCheck +" Name "+ BranchCheck);								
+		}
+	}
+	
+	@Test (dependsOnMethods = {"Login"})
+	public void Logout() throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/a/span/span[2]")).click();
+		log.info("Click action performed on Account drop down menu");
+		
+		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/ul/li[4]/a/span[2]")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Log out");
+		
+		Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/h1")).getAttribute("innerText");												
+		Assert.assertTrue(Status.equalsIgnoreCase("Welcome to Gurukula!"), "The log out action was not performed!");
+		Reporter.log("Logout succcessfully");
+	}
+	
+	@Test (dependsOnMethods = {"OpenBrowser"})
+	public void Close() throws InterruptedException {
+		Mozila.close();
+		Thread.sleep(2000);
+		log.info("Browser was been closed");
+		Reporter.log("Browser was been closed");
+	}
+	
 	
 	
 	
