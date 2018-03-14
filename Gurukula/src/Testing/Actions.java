@@ -604,29 +604,7 @@ public class Actions {
 			Reporter.log("Found staff with the folowing information: ID "+ IDCheck +" Name "+ BranchCheck);								
 		}
 	}
-	
-	@Test (dependsOnMethods = {"Login"})
-	public void Logout() throws InterruptedException, IOException {
-		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/a/span/span[2]")).click();
-		log.info("Click action performed on Account drop down menu");
 		
-		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/ul/li[4]/a/span[2]")).click();
-		Thread.sleep(1500);
-		log.info("Click action performed on Log out");
-		
-		Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/h1")).getAttribute("innerText");												
-		Assert.assertTrue(Status.equalsIgnoreCase("Welcome to Gurukula!"), "The log out action was not performed!");
-		Reporter.log("Logout succcessfully");
-	}
-	
-	@Test (dependsOnMethods = {"OpenBrowser"})
-	public void Close() throws InterruptedException {
-		Mozila.close();
-		Thread.sleep(2000);
-		log.info("Browser was been closed");
-		Reporter.log("Browser was been closed");
-	}
-	
 	@Test (dependsOnMethods = {"NavigateToAccountInformation"})
 	@Parameters ({"FirstNameCheck" , "LastNameCheck" , "EmailCheck" , "LanguageCheck"})
 	public void CheckAccountInformation(String FirstName, String LastName, String Email, String Language) throws IOException {
@@ -666,6 +644,14 @@ public class Actions {
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).sendKeys(Email);
 		log.info("Desired email address has been entered in the Email text box");
 		
+		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div/p[1]")).isDisplayed(), "The chosen first name can't be set as a first name!");
+		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/div/p[1]")).isDisplayed(), "The chosen last name can't be set as a last name!");
+		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div/p[1]")).isDisplayed() ||
+			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div/p[2]")).isDisplayed() ||
+			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div/p[3]")).isDisplayed() , 
+			"The chosen email is not a correct email address!");
+		Reporter.log("First name, last name and email have the correct format");
+		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();		
 		Thread.sleep(1000);
 		log.info("Click action performed on the save button");
@@ -675,11 +661,114 @@ public class Actions {
 		Reporter.log("Account information has been changed!");
 	}
 
-	
-	
-	
-	
-	
-	
-}
+	@Test (dependsOnMethods = {"NavigateToPasswordChange"})
+	@Parameters ({"Password" , "ConfirmationPassword"})
+	public void ChangePassword(String Password, String ConfirmationPassword) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).clear();
+		log.info("Cleared the password text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).clear();
+		log.info("Cleared the confirmation password text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).sendKeys(Password);
+		log.info("New password has been entered in the Password text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).sendKeys(ConfirmationPassword);
+		log.info("New confirmation password has been entered in the Confirmation Password text box");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div[1]/p[1]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div[1]/p[2]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div[1]/p[3]")).isDisplayed(),
+				"The chosen password doesn't meet the standard format!");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Save button");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[2]")).isDisplayed() &&
+			!Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[3]")).isDisplayed(), 
+			"An error has occurred! The password could not be changed.");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[3]")).isDisplayed(), "An error has occurred! Password and confirmation password need to be the same");
+		Reporter.log("Password has benn changed");
+	}
 
+	@Test (dependsOnMethods = {"OpenBrowser"})
+	@Parameters ({"UserID" , "UserEmail" , "UserPassword" , "UserConfirmationPassword"})
+	public void RegisterUser(String User, String Email, String Password, String ConfirmationPassword) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/div/div[2]/a")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Register a new user button");
+			
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).clear();
+		log.info("Cleared the user name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).clear();
+		log.info("Cleared the email text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).clear();
+		log.info("Cleared the password text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[4]/input")).clear();
+		log.info("Cleared the confirmation password text box");
+			
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).sendKeys(User);
+		log.info("User name has been entered in the Login text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).sendKeys(Email);
+		log.info("Email address has been entered in the EMail text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).sendKeys(Password);
+		log.info("Password has been entered in the Password text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[4]/input")).sendKeys(ConfirmationPassword);
+		log.info("Confirmation password has been entered in the Confirmation Password text box");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div/p[1]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div/p[2]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div/p[3]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div/p[4]")).isDisplayed(), 
+				"User "+ User +" doesn't respect the standard format!");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/div/p[1]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/div/p[2]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/div/p[3]")).isDisplayed(), 
+				"Email "+ Email +" doesn't respect the standard format!");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div[1]/p[1]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div[1]/p[2]")).isDisplayed() ||
+				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div[1]/p[3]")).isDisplayed(), 
+				"Password "+ Password +" doesn't respect the standard format!");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Save button");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[5]")).isDisplayed(), "Password "+ Password +" has to be the same as confirmation password "+ ConfirmationPassword);
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[2]")).isDisplayed(), "An error has appeared and the user hasn't been registered!");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[3]")).isDisplayed(), "A user with this name "+ User +" already exists!");
+		Reporter.log("User has been successfully registered");	
+	}
+	
+	@Test (dependsOnMethods = {"Login"})
+	public void Logout() throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/a/span/span[2]")).click();
+		log.info("Click action performed on Account drop down menu");
+		
+		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/ul/li[4]/a/span[2]")).click();
+		Thread.sleep(1500);
+		log.info("Click action performed on Log out");
+		
+		Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/h1")).getAttribute("innerText");												
+		Assert.assertTrue(Status.equalsIgnoreCase("Welcome to Gurukula!"), "The log out action was not performed!");
+		Reporter.log("Logout succcessfully");
+	}
+	
+	
+	@Test (dependsOnMethods = {"OpenBrowser"})
+	public void Close() throws InterruptedException {
+		Mozila.close();
+		Thread.sleep(2000);
+		log.info("Browser was been closed");
+		Reporter.log("Browser was been closed");
+	}	
+}
