@@ -8,6 +8,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.Reporter;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -52,9 +53,13 @@ public class Actions {
 		}			
 	}
 	
-	@Test (dependsOnMethods = {"OpenBrowser"})
-	@Parameters ({"User", "Password" , "RememberMe"})
-	public void Login(String User, String Password, Boolean RememberMe) throws InterruptedException, IOException {
+	@DataProvider(name = "Authentication")	 
+	public static Object[][] credentials() {
+		return new Object[][] { { "admin", "" , "no"} , {"" , "admin" , "no"} , {"admin" , "admin" , "da"} };	 
+	}	 
+	  
+	@Test (dependsOnMethods = {"OpenBrowser"} , dataProvider = "Authentication")
+	public void Login(String User, String Password, String RememberMe) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[1]/a[2]/span[2]")).click();
 		Thread.sleep(1000);
 		log.info("Click on Home button");
@@ -73,16 +78,20 @@ public class Actions {
 		log.info("Username entered in the Username text box");
 		Mozila.findElement(By.xpath("//*[@id=\"password\"]")).sendKeys(Password);
 		log.info("Password entered in the Password text box");
-		if (!RememberMe) {
+		
+		Assert.assertTrue(RememberMe.equalsIgnoreCase("yes") || RememberMe.equalsIgnoreCase("no") , "In order to use remeber me functionality a value of \"yes\" or \"no\" must be assigned to the variable RememberMe!");
+		if (RememberMe == "no") {
 			Mozila.findElement(By.xpath("//*[@id=\"rememberMe\"]")).click();
 			log.info("RememberMe check box is unchecked");
 		}
-		else {
+		else if (RememberMe == "yes"){
 			log.info("RememberMe check box is checked");
 		}
+		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
 		Thread.sleep(2000);
 		log.info("Click action performed on Authentificate button");
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[1]")).isDisplayed(), "The entered credentials are not correct!");
 		
 		//check that we are logged in
 		if (Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul")).getAttribute("childElementCount").equalsIgnoreCase("4")) {
