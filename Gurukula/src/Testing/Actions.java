@@ -27,6 +27,10 @@ public class Actions {
 	String BranchSecondCheck = "";
 	String CodeSecondCheck = "";
 	String StaffSecondCheck = "";
+	String FirstNameCheck = "";
+	String LastNameCheck = "";
+	String EmailCheck = "";
+	String LanguageCheck = "";
 	int NrOfResults = 0;
 	int SecondNrOfResults = 0;
 	int Error = 0;
@@ -623,9 +627,53 @@ public class Actions {
 		Reporter.log("Browser was been closed");
 	}
 	
+	@Test (dependsOnMethods = {"NavigateToAccountInformation"})
+	@Parameters ({"FirstNameCheck" , "LastNameCheck" , "EmailCheck" , "LanguageCheck"})
+	public void CheckAccountInformation(String FirstName, String LastName, String Email, String Language) throws IOException {
+		Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/h2")).getAttribute("innerText");
+		FirstNameCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).getAttribute("value");
+		LastNameCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).getAttribute("value");
+		EmailCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).getAttribute("value");
+		LanguageCheck = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[4]/select")).getAttribute("innerText");
+		Assert.assertTrue(Status.equalsIgnoreCase("User settings for [admin]") && 
+				FirstNameCheck.equalsIgnoreCase(FirstName) &&	
+				LastNameCheck.equalsIgnoreCase(LastName) &&	
+				EmailCheck.equalsIgnoreCase(Email) && 
+				LanguageCheck.equalsIgnoreCase("English"), 
+				"The account information is incorrect!");
+		log.info("Account information has been checked and the information was correct");
+		Reporter.log("Account information is correct!");
+	}
 	
-	
-	
+	@Test (dependsOnMethods = {"NavigateToAccountInformation"})
+	@Parameters ({"FirstName" , "LastName" , "Email"})
+	public void ChangeAllAccountInformation(String FirstName, String LastName, String Email) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).clear();
+		log.info("Cleared the first name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).clear();
+		log.info("Cleared the last name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).clear();
+		log.info("Cleared the email text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).sendKeys(FirstName);
+		log.info("Desired first name has been entered in the First Name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).sendKeys(LastName);
+		log.info("Desired last name has been entered in the Last Name text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).sendKeys(Email);
+		log.info("Desired email address has been entered in the Email text box");
+		
+		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();		
+		Thread.sleep(1000);
+		log.info("Click action performed on the save button");
+		
+		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[3]/strong")).isDisplayed(), "Account information hasn't been changed!");
+		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[1]/strong")).isDisplayed(), "Account information hasn't been changed!");
+		Reporter.log("Account information has been changed!");
+	}
 	
 }
 
