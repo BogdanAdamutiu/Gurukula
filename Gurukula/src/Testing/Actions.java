@@ -674,6 +674,12 @@ public class Actions {
 		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[1]/strong")).isDisplayed(), "Account information hasn't been changed!");
 		Reporter.log("Account information has been changed!");
 	}
+
+	
+	
+	
+	
+	
 	
 }
 
