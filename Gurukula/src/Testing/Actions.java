@@ -775,9 +775,26 @@ public class Actions {
 		Reporter.log("Password has benn changed");
 	}
 
-	@Test (dependsOnMethods = {"OpenBrowser"})
+	@DataProvider(name = "VerifyUser")	 
+	public static Object[][] Users() {
+		return new Object[][] { { "testing", "test@yahoo.com" , "testing", "testing" } , 
+								{ "test", "t@t" , "test", "test" } , 
+								{ "thisusernameshouldbetolongtobeausernamewithmorethen", "test@" , "thisusernameshouldbetolongtobeausernamewithmorethen" , "thisusernameshouldbetolongtobeausernamewithmorethen" } ,
+								{ "TESTING", "TESTING@YAHOO.COM" , "TESTING", "TESTING" } ,
+								{ "1t2e3s4t", "1t2e3s4t@yahoo.com" , "1t2e3s4t", "1t2e3s4t" } ,
+								{ "!@#$%^", "!@#$%^@yahoo.com" , "!@#$%^", "!@#$%^" } ,
+								{ "testing", "test@yahoo,com" , "testing", "newtesting" } ,
+								{ "testing", "test@" , "testing", "testing" } ,
+								{ "admin", "admin@localhos" , "admin" , "admin" }};
+	}
+	
+	@Test (dependsOnMethods = {"OpenBrowser"} , dataProvider = "VerifyUser")
 	@Parameters ({"UserID" , "UserEmail" , "UserPassword" , "UserConfirmationPassword"})
 	public void RegisterUser(String User, String Email, String Password, String ConfirmationPassword) throws InterruptedException, IOException {
+		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[1]/a[2]/span[2]")).click();
+		Thread.sleep(1000);
+		log.info("Click on Home button");
+		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/div/div[2]/a")).click();
 		Thread.sleep(1500);
 		log.info("Click action performed on Register a new user button");
@@ -821,6 +838,7 @@ public class Actions {
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div[1]/p[2]")).isDisplayed() ||
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/div[1]/p[3]")).isDisplayed(), 
 				"Password "+ Password +" doesn't respect the standard format!");
+		Reporter.log("Data format chosen for UserID, Email and Password respect the standard");
 		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
 		Thread.sleep(1500);
