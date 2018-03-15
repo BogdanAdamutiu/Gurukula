@@ -673,7 +673,7 @@ public class Actions {
 		}
 	}
 		
-	@Test (dependsOnMethods = {"NavigateToAccountInformation"})
+	@Test (dependsOnMethods = {"NavigateToAccountInformation"} , priority = 10)
 	@Parameters ({"FirstNameCheck" , "LastNameCheck" , "EmailCheck" , "LanguageCheck"})
 	public void CheckAccountInformation(String FirstName, String LastName, String Email, String Language) throws IOException {
 		Status = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/h2")).getAttribute("innerText");
@@ -691,8 +691,20 @@ public class Actions {
 		Reporter.log("Account information is correct!");
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToAccountInformation"})
-	@Parameters ({"FirstName" , "LastName" , "Email"})
+	@DataProvider(name = "VerifyAccountInformation")	 
+	public static Object[][] AccountInfo() {
+		return new Object[][] { { "" , "" , "" } ,
+								{ "testing" , "testing", "test@yahoo.com" } , 
+								{ "test" , "test", "t@t" } , 
+								{ "thisusernameshouldbetolongtobeausernamewithmorethen" , "thisusernameshouldbetolongtobeausernamewithmorethen" , "thisusernameshouldbetolongtobeausernamewithmorethen@yahoo.com" } ,
+								{ "TESTING" , "TESTING" , "TESTING@YAHOO.COM" } ,
+								{ "1t2e3s4t" , "1t2e3s4t" , "1t2e3s4t@yahoo.com" } ,
+								{ "!@#$%^" , "!@#$%^" , "!@#$%^@yahoo.com" } ,
+								{ "testing" , "testing" , "wrong@yahoo,com" } ,
+								{ "testing" , "testing" , "incomplete@yahoo" } };
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToAccountInformation"} , dataProvider = "VerifyAccountInformation" , priority = 11)
 	public void ChangeAllAccountInformation(String FirstName, String LastName, String Email) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).clear();
 		log.info("Cleared the first name text box");
@@ -711,6 +723,7 @@ public class Actions {
 		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[3]/input")).sendKeys(Email);
 		log.info("Desired email address has been entered in the Email text box");
+		Thread.sleep(1000);
 		
 		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div/p[1]")).isDisplayed(), "The chosen first name can't be set as a first name!");
 		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/div/p[1]")).isDisplayed(), "The chosen last name can't be set as a last name!");
@@ -743,7 +756,6 @@ public class Actions {
 	}
 	
 	@Test (dependsOnMethods = {"NavigateToPasswordChange"} , dataProvider = "VerifyPassword")
-	@Parameters ({"Password" , "ConfirmationPassword"})
 	public void ChangePassword(String Password, String ConfirmationPassword) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).clear();
 		log.info("Cleared the password text box");
@@ -789,7 +801,6 @@ public class Actions {
 	}
 	
 	@Test (dependsOnMethods = {"OpenBrowser"} , dataProvider = "VerifyUser")
-	@Parameters ({"UserID" , "UserEmail" , "UserPassword" , "UserConfirmationPassword"})
 	public void RegisterUser(String User, String Email, String Password, String ConfirmationPassword) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[1]/a[2]/span[2]")).click();
 		Thread.sleep(1000);
@@ -850,7 +861,7 @@ public class Actions {
 		Reporter.log("User has been successfully registered");	
 	}
 	
-	@Test (priority = 1)
+	@Test (priority = 12)
 	public void Logout() throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/a/span/span[2]")).click();
 		log.info("Click action performed on Account drop down menu");
@@ -864,7 +875,7 @@ public class Actions {
 		Reporter.log("Logout succcessfully");
 	}
 	
-	@Test (dependsOnMethods = {"OpenBrowser"}  , priority = 2)
+	@Test (dependsOnMethods = {"OpenBrowser"}  , priority = 13)
 	public void Close() throws InterruptedException {
 		Mozila.close();
 		Thread.sleep(2000);
