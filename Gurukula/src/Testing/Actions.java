@@ -59,13 +59,13 @@ public class Actions {
 	@DataProvider(name = "Authentication")	 
 	public static Object[][] credentials(ITestContext TestName) {
 		if (TestName.getName().equalsIgnoreCase("Login Verification")) {
-			return new Object[][] { { "", "" , "no"} , 
-									{ "admin", "" , "no"} , 
-									{ "", "admin" , "no"} ,
-									{ "admin", "wrong" , "no"} ,
-									{ "wrong", "admin" , "no"} ,
-									{ "admin", "admin" , "error"} ,
-									{ "admin", "admin" , "no"} };
+			return new Object[][] { { "" , "" , "no"} , 
+									{ "admin" , "" , "no"} , 
+									{ "" , "admin" , "no"} ,
+									{ "admin" , "wrong" , "no"} ,
+									{ "wrong" , "admin" , "no"} ,
+									{ "admin" , "admin" , "error"} ,
+									{ "admin" , "admin" , "no"} };
 		}
 		else {
 			return new Object[][] { { "admin", "admin" , "no"} };
@@ -222,8 +222,25 @@ public class Actions {
 		}
 	}
 
-	@Test (dependsOnMethods = {"NavigateToBranch"})
-	@Parameters ({"Branch" , "Code"})
+	@DataProvider(name = "Branch")	 
+	public static Object[][] BranchInfo(ITestContext TestName) {
+		if (TestName.getName().equalsIgnoreCase("Branch Verification")) {
+			return new Object[][] { { "", "" } , 
+									{ "t", "2" } , 
+									{ "thisusernameshouldbetolongtobeausernamewithmorethen", "12345678987654321" } ,
+									{ "TESTING", "TESTING" } ,
+									{ "1t2e3s4t", "1t2e3s4t" } ,
+									{ "!@#$%^", "!@#$%^" } ,
+									{ "1234567", "testing" } }; 
+		}
+		else {
+			return new Object[][] { { "Development", "123456" } , 
+									{ "Financial", "987654" } , 
+									{ "Human Resources", "246801" } };
+		}
+	}	
+	
+	@Test (dependsOnMethods = {"NavigateToBranch"} , dataProvider = "Branch" , priority = 0)
 	public void CreateBranch(String Branch, String Code) throws InterruptedException, IOException {
 		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).isDisplayed()) {
 			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).click();
@@ -283,8 +300,25 @@ public class Actions {
 		}
 	}
 
-	@Test (dependsOnMethods = {"NavigateToStaff"})
-	@Parameters ({"Staff","AssigningBranch"})
+	@DataProvider(name = "Staff")	 
+	public static Object[][] StaffInfo(ITestContext TestName) {
+		if (TestName.getName().equalsIgnoreCase("Staff Verification")) {
+			return new Object[][] { { "" , "QA Team" } , 
+									{ "t" , "Human Resources" } , 
+									{ "thisusernameshouldbetolongtobeausernamewithmorethen" , "Human Resources" } ,
+									{ "TESTING" , "QA Team" } ,
+									{ "1t2e3s4t" , "Human Resources" } ,
+									{ "!@#$%^ " , "Human Resources" } ,
+									{ "1234567" , "QA Team" } }; 
+		}
+		else {
+			return new Object[][] { { "Tester" , "QA Team" } , 
+									{ "QA Engineer" , "QA Team" } , 
+									{ "Recruter" , "Human Resources" } };
+		}
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToStaff"} , dataProvider = "Staff" , priority = 5)
 	public void CreateStaff(String Staff, String AssigningBranch) throws InterruptedException, IOException {	
 		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).isDisplayed()) {
 			Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[2]/div/div/form/div[3]/button[1]")).click();
@@ -334,7 +368,7 @@ public class Actions {
 		}
 	}	
 
-	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Test (dependsOnMethods = {"NavigateToBranch"} , priority = 1)
 	@Parameters ({"BranchNameView" , "BranchCodeView"})
 	public void ViewBranch(String BranchName, String BranchCode) throws InterruptedException, IOException {
 		Matched = 0;
@@ -379,7 +413,7 @@ public class Actions {
 		Assert.assertFalse(Matched == 0, "The branch with the name "+ BranchName +" and code "+ BranchCode +" doesn't exist and can't be viewed!");
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Test (dependsOnMethods = {"NavigateToStaff"} , priority = 6)
 	@Parameters ({"StaffNameView" , "StaffBranchView"})
 	public void ViewStaff(String StaffName, String StaffBranch) throws InterruptedException, IOException {
 		Matched = 0;
@@ -413,7 +447,7 @@ public class Actions {
 		Assert.assertFalse(Matched == 0, "The staff with the name "+ StaffName +" and assigned branch "+ StaffBranch +" doesn't exist and can't be viewed!");
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Test (dependsOnMethods = {"NavigateToBranch"} , priority = 2)
 	@Parameters ({"BranchToEdit" , "NewBranchName" , "CodeToEdit" , "NewBranchCode"})
 	public void EditBranch(String Name, String NewName, String Code, String NewCode) throws InterruptedException, IOException {				
 		Matched = 0;
@@ -484,7 +518,7 @@ public class Actions {
 		Assert.assertFalse(Matched == 0, "The branch with the name "+ Name +" and code "+ Code +" hasn't been edited!");
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Test (dependsOnMethods = {"NavigateToStaff"} , priority = 7)
 	@Parameters ({"StaffToEdit" , "NewStaffName" , "ActualStaffBranch" , "NewStaffBranch"})
 	public void EditStaff(String Name, String NewName, String Branch, String NewBranch) throws InterruptedException, IOException {			
 		Matched = 0;
@@ -537,7 +571,7 @@ public class Actions {
 		Assert.assertFalse(Matched == 0, "The staff with the name "+ Name +" and assigned branch "+ Branch +" hasn't been edited!");
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToBranch"})
+	@Test (dependsOnMethods = {"NavigateToBranch"} , priority = 3)
 	@Parameters ({"BranchToDelete" , "CodeToDelete"})
 	public void DeteleBranch(String Name, String Code) throws InterruptedException, IOException {
 		if (Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[3]/div/div/form/div[3]/button[1]")).isDisplayed()) {
@@ -581,7 +615,7 @@ public class Actions {
 		}
 	}	
 	
-	@Test (dependsOnMethods = {"NavigateToStaff"})
+	@Test (dependsOnMethods = {"NavigateToStaff"} , priority = 8)
 	@Parameters ({"StaffToDelete" , "StaffBranchToDelete"})
 	public void DeleteStaff(String Name, String Branch) throws InterruptedException, IOException {		
 		Results = Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div[4]/table/tbody")).getAttribute("childElementCount");
@@ -621,8 +655,14 @@ public class Actions {
 		}
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToBranch"})
-	@Parameters ({"BranchSearchCriteria"})
+	@DataProvider(name = "SearchBranch")	 
+	public static Object[][] BranchSearchCriteria() {
+		return new Object[][] { { "Development" } ,
+								{ "246801" } , 
+								{ "3" } };
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToBranch"} , dataProvider = "SearchBranch" , priority = 4)
 	public void QueryBranch(String SearchCriteria) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
 		log.info("Cleared the branch search text box");
@@ -648,9 +688,15 @@ public class Actions {
 		}
 	}
 	
-	@Test (dependsOnMethods = {"NavigateToStaff"})
-	@Parameters ({"StaffSearchCriteria"})
-	public void QueryStaff(String SearchCriteria, String Test) throws InterruptedException, IOException {
+	@DataProvider(name = "SearchStaff")	 
+	public static Object[][] StaffSearchCriteria() {
+		return new Object[][] { { "Tester" } ,
+								{ "QA Team" } , 
+								{ "3" } };
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToStaff"} , dataProvider = "SearchStaff" , priority = 9)
+	public void QueryStaff(String SearchCriteria) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("//*[@id=\"searchQuery\"]")).clear();
 		log.info("Cleared the staff search text box");
 		
