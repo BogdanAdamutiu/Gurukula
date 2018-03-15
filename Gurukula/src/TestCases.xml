@@ -1,58 +1,197 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Gurukula" verbose="1" >
-    <!--
-  <test name="Branch" >  	
-  	<parameter name="User" value="admin"/> 
-	<parameter name="Password" value="admin"/>
-	<parameter name="RememberMe" value="false"/>
-	<parameter name="Branch" value="Development" />
-	<parameter name="Code" value="123456" />	
-	<parameter name="BranchNameView" value="Development" />
-	<parameter name="BranchCodeView" value="123456" />
-	<parameter name="BranchToEdit" value="Development" />
-	<parameter name="CodeToEdit" value="123456" />
-	<parameter name="NewBranchName" value="QA Team" />
-	<parameter name="NewBranchCode" value="456789" />
-	<parameter name="BranchToDelete" value="Development" />
-	<parameter name="CodeToDelete" value="123456" />	
-    <classes>
-       <class name="Testing.Actions">
-        <methods>
-        <include name="OpenBrowser" />
-        <include name="Login" />
-        <include name="NavigateToBranch" />
-        <include name="CreateBranch" />
-        <include name="DeteleBranch" />       
-      </methods>
-       </class>
-    </classes>
+<suite name="Gurukula" verbose="1" > 
+	<test name="Login Verification">
+	<!--
+		This test case will test the login part of the application.
+		It will try to login with wrong credentials and see if an error message appears.
+	 -->
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="Login" />
+					<include name="Logout" />
+					<include name="Close" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+	<test name="Remember me">
+	<!--
+		This test case will test if the remember me function of the login works.
+		It will select remember me and check if user is still logged in after closing.
+	 -->
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="TestRememberLogin" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+	<test name="Password Change">
+	<!--
+		This test case will test what type of characters are allowed to be used in password
+		and if a wrong type is used it will check if a warning message appears.
+		It will enter special characters, upper case characters, numbers and letters, 
+		a long password, a short password, confirmation password different than password.
+	 -->
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="Login" />
+					<include name="NavigateToPasswordChange" />
+					<include name="ChangePassword" />
+					<include name="Logout" />
+					<include name="Close" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+	<test name="Register new user">
+	<!--
+		This test case will test what type of characters are allowed to be used in UserID,
+		Email address and Password and if a wrong type is used it will check if a warning 
+		message appears.
+		It will enter special characters, upper case characters, numbers and letters, 
+		a long password, a short password, confirmation password different than password.
+	 -->
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="RegisterUser" />
+					<include name="Close" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+	<test name="Verify Account Information">
+	<!--
+		This test case will test what type of characters are allowed to be used in 
+		First Name,	Last Name and Email and if a wrong type is used it will check if a 
+		warning message appears. 
+		It will enter special characters, upper case characters, numbers and letters, 
+		a long password, a short password, confirmation password different than password.
+	 -->
+	  <parameter name="FirstNameCheck" value="Administrator" /> 
+	  <parameter name="LastNameCheck" value="Administrator" />
+	  <parameter name="EmailCheck" value="admin@localhost" />
+	  <parameter name="LanguageCheck" value="English" />
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="Login" />
+					<include name="NavigateToAccountInformation" />
+					<include name="CheckAccountInformation" />
+					<include name="ChangeAllAccountInformation" />
+					<include name="Logout" />
+					<include name="Close" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+	<test name="Branch Verification">
+	<!--
+		This test case will test what type of characters are allowed to be used in Branch 
+		Name and Code and if a wrong type is used it will check if a warning message appears. 
+		It will enter special characters, upper case characters, numbers and letters, 
+		a long name and code, a short name and code.
+	 -->
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="Login" />
+					<include name="NavigateToBranch" />
+					<include name="CreateBranch" />
+					<include name="Logout" />
+					<include name="Close" />
+				</methods>
+			</class>
+		</classes>
+	</test>
+	<test name="Branch" >
+	 <!--
+		This test case will test what the function that can be applied to a branch.  
+		It will create, view, edit, delete and query branches.
+	 -->
+	  <parameter name="BranchNameView" value="Development" />
+	  <parameter name="BranchCodeView" value="123456" />
+	  <parameter name="BranchToEdit" value="Development" />
+	  <parameter name="CodeToEdit" value="123456" />
+	  <parameter name="NewBranchName" value="QA Team" />
+	  <parameter name="NewBranchCode" value="456789" />
+	  <parameter name="BranchToDelete" value="Financial" />
+	  <parameter name="CodeToDelete" value="987654" />	
+    	<classes>
+       		<class name="Testing.Actions">
+        		<methods>
+        			<include name="OpenBrowser" />
+        			<include name="Login" />
+        			<include name="NavigateToBranch" />
+        			<include name="CreateBranch" />
+        			<include name ="ViewBranch" />
+        			<include name="EditBranch" />
+        			<include name="DeteleBranch" />
+        			<include name="QueryBranch" />
+        			<include name="Logout" />
+					<include name="Close" />       
+      			</methods>
+       		</class>
+    	</classes>
   </test>
-  	-->
+  <test name="Staff Verification">
+	<!--
+		This test case will test what type of characters are allowed to be used in Staff 
+		Name and if a wrong type is used it will check if a warning message appears. 
+		It will enter special characters, upper case characters, numbers and letters, 
+		a long name and code, a short name and code.
+	 -->
+		<classes>
+			<class name="Testing.Actions">
+				<methods>
+					<include name="OpenBrowser" />
+					<include name="Login" />
+					<include name="NavigateToStaff" />
+					<include name="CreateStaff" />
+					<include name="Logout" />
+					<include name="Close" />
+				</methods>
+			</class>
+		</classes>
+	</test>
   <test name="Staff">
-  	<parameter name="User" value="admin"/> 
-	<parameter name="Password" value="admin"/>
-	<parameter name="RememberMe" value="false"/>
-	<parameter name="Staff" value="Tester"/>
-	<parameter name="AssigningBranch" value="Development" />
-	<parameter name="StaffNameView" value="Tester" />
-	<parameter name="StaffBranchView" value="Development" />
-	<parameter name="StaffToEdit" value="Tester"/>
-	<parameter name="ActualStaffBranch" value="Development" />
-	<parameter name="NewStaffName" value="QA Engineer"/>
-	<parameter name="NewStaffBranch" value="Development" />
-	<parameter name="StaffToDelete" value="Tester"/>
-	<parameter name="StaffBranchToDelete" value="Development" />
-	<classes>
-       <class name="Testing.Actions">
-     	<methods>
-     	 <include name="OpenBrowser" />
-         <include name="Login" />
-         <include name="NavigateToStaff" />
-         <include name="CreateStaff" />
-		 <include name="DeleteStaff" />
-     	</methods>
-       </class>
-    </classes>
+   <!--
+		This test case will test what the function that can be applied to a staff.  
+		It will create, view, edit, delete and query staffs.
+	 -->
+	  <parameter name="StaffNameView" value="Tester" />
+	  <parameter name="StaffBranchView" value="QA Team" />
+	  <parameter name="StaffToEdit" value="Tester"/>
+	  <parameter name="ActualStaffBranch" value="QA Team" />
+	  <parameter name="NewStaffName" value="Automation Tester"/>
+	  <parameter name="NewStaffBranch" value="Human Resources" />
+	  <parameter name="StaffToDelete" value="Automation Tester" />
+	  <parameter name="StaffBranchToDelete" value="Human Resources" />
+		<classes>
+      		<class name="Testing.Actions">
+     			<methods>
+     	 			<include name="OpenBrowser" />
+         			<include name="Login" />
+         			<include name="NavigateToStaff" />
+         			<include name="CreateStaff" />
+         			<include name="ViewStaff" />
+         			<include name="EditStaff" />
+		 			<include name="DeleteStaff" />
+					<include name="QueryStaff" />
+		 			<include name="Logout" />
+					<include name="Close" />  
+     			</methods>
+       		</class>
+    	</classes>
   </test>
-	
 </suite>
