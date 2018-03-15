@@ -64,8 +64,8 @@ public class Actions {
 									{ "", "admin" , "no"} ,
 									{ "admin", "wrong" , "no"} ,
 									{ "wrong", "admin" , "no"} ,
-									{ "admin", "admin" , "no"} ,
-									{ "admin", "admin" , "error"} };
+									{ "admin", "admin" , "error"} ,
+									{ "admin", "admin" , "no"} };
 		}
 		else {
 			return new Object[][] { { "admin", "admin" , "no"} };
@@ -105,15 +105,8 @@ public class Actions {
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
 		Thread.sleep(2000);
 		log.info("Click action performed on Authentificate button");
-		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/div/div")).isDisplayed(), "The entered credentials are not correct!");
-													  
-		//check that we are logged in
-		if (Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul")).getAttribute("childElementCount").equalsIgnoreCase("4")) {
-			Reporter.log("Sign in successful");
-		}
-		else {
-			Reporter.log("Sign in didn't work");
-		}
+		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul")).getAttribute("childElementCount").equalsIgnoreCase("4"), "The entered credentials are not correct!");
+		Reporter.log("Sign in successful");
 		Thread.sleep(1500);
 	}
 	
@@ -736,7 +729,20 @@ public class Actions {
 		Reporter.log("Account information has been changed!");
 	}
 
-	@Test (dependsOnMethods = {"NavigateToPasswordChange"})
+	@DataProvider(name = "VerifyPassword")	 
+	public static Object[][] Passwords() {
+		return new Object[][] { { "", "" } , 
+								{ "test", "test" } , 
+								{ "thisusernameshouldbetolongtobeausernamewithmorethen", "thisusernameshouldbetolongtobeausernamewithmorethen" } ,
+								{ "TESTING", "TESTING" } ,
+								{ "1t2e3s4t", "1t2e3s4t" } ,
+								{ "!@#$%^", "!@#$%^" } ,
+								{ "testing", "newtesting" } ,
+								{ "testing", "testing" } ,
+								{ "admin", "admin" }};
+	}
+	
+	@Test (dependsOnMethods = {"NavigateToPasswordChange"} , dataProvider = "VerifyPassword")
 	@Parameters ({"Password" , "ConfirmationPassword"})
 	public void ChangePassword(String Password, String ConfirmationPassword) throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/input")).clear();
@@ -750,11 +756,13 @@ public class Actions {
 		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[2]/input")).sendKeys(ConfirmationPassword);
 		log.info("New confirmation password has been entered in the Confirmation Password text box");
+		Thread.sleep(1500);
 		
 		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div[1]/p[1]")).isDisplayed() ||
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div[1]/p[2]")).isDisplayed() ||
 				Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/div[1]/div[1]/p[3]")).isDisplayed(),
 				"The chosen password doesn't meet the standard format!");
+		Reporter.log("The chosen password meets the standard format");
 		
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
 		Thread.sleep(1500);
@@ -824,7 +832,7 @@ public class Actions {
 		Reporter.log("User has been successfully registered");	
 	}
 	
-	@Test (dependsOnMethods = {"Login"} , priority = 1)
+	@Test (priority = 1)
 	public void Logout() throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/a/span/span[2]")).click();
 		log.info("Click action performed on Account drop down menu");
