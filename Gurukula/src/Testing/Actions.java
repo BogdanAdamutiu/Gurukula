@@ -7,6 +7,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
+import org.testng.ITestContext;
+import org.testng.ITestResult;
 import org.testng.Reporter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
@@ -38,7 +40,7 @@ public class Actions {
 	int Matched = 0;
 	int Decrement = 0;
 	int DeletedStaffs = 0;
-	
+		
 	@Test	
 	public void OpenBrowser() {
 		Mozila.manage().window().maximize();;
@@ -54,12 +56,24 @@ public class Actions {
 	}
 	
 	@DataProvider(name = "Authentication")	 
-	public static Object[][] credentials() {
-		return new Object[][] { { "admin", "" , "no"} , {"" , "admin" , "no"} , {"admin" , "admin" , "da"} };	 
+	public static Object[][] credentials(ITestContext TestName) {
+		if (TestName.getName().equalsIgnoreCase("Login Verification")) {
+			return new Object[][] { { "", "" , "no"} , 
+									{ "admin", "" , "no"} , 
+									{ "", "admin" , "no"} ,
+									{ "admin", "wrong" , "no"} ,
+									{ "wrong", "admin" , "no"} ,
+									{ "admin", "admin" , "no"} ,
+									{ "admin", "admin" , "error"} };
+		}
+		else {
+			return new Object[][] { { "admin", "admin" , "no"} };
+		}
 	}	 
 	  
 	@Test (dependsOnMethods = {"OpenBrowser"} , dataProvider = "Authentication")
 	public void Login(String User, String Password, String RememberMe) throws InterruptedException, IOException {
+		
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[1]/a[2]/span[2]")).click();
 		Thread.sleep(1000);
 		log.info("Click on Home button");
@@ -91,8 +105,8 @@ public class Actions {
 		Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/form/button")).click();
 		Thread.sleep(2000);
 		log.info("Click action performed on Authentificate button");
-		Assert.assertFalse(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div/div[1]")).isDisplayed(), "The entered credentials are not correct!");
-		
+		Assert.assertTrue(Mozila.findElement(By.xpath("/html/body/div[3]/div[1]/div/div/div[2]/div/div")).isDisplayed(), "The entered credentials are not correct!");
+													  
 		//check that we are logged in
 		if (Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul")).getAttribute("childElementCount").equalsIgnoreCase("4")) {
 			Reporter.log("Sign in successful");
@@ -758,7 +772,7 @@ public class Actions {
 		Reporter.log("User has been successfully registered");	
 	}
 	
-	@Test (dependsOnMethods = {"Login"})
+	@Test (dependsOnMethods = {"Login"} , priority = 1)
 	public void Logout() throws InterruptedException, IOException {
 		Mozila.findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/ul/li[3]/a/span/span[2]")).click();
 		log.info("Click action performed on Account drop down menu");
@@ -772,8 +786,7 @@ public class Actions {
 		Reporter.log("Logout succcessfully");
 	}
 	
-	
-	@Test (dependsOnMethods = {"OpenBrowser"})
+	@Test (dependsOnMethods = {"OpenBrowser"}  , priority = 2)
 	public void Close() throws InterruptedException {
 		Mozila.close();
 		Thread.sleep(2000);
